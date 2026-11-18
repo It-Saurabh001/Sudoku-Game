@@ -23,6 +23,7 @@ class UserPreferencesDataStore(private val context: Context) {
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val HIGHLIGHT_ERRORS = booleanPreferencesKey("highlight_errors")
         val AUTO_SAVE = booleanPreferencesKey("auto_save")
+        val REDUCE_MOTION = booleanPreferencesKey("reduce_motion")
     }
 
     val notesModeEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -54,6 +55,10 @@ class UserPreferencesDataStore(private val context: Context) {
 
     val autoSave: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[AUTO_SAVE] ?: true
+    }
+
+    val reduceMotion: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[REDUCE_MOTION] ?: false
     }
 
     suspend fun updateThemeMode(mode: String) {
@@ -100,6 +105,12 @@ class UserPreferencesDataStore(private val context: Context) {
     suspend fun updateNotesModeEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[NOTES_MODE_ENABLED] = enabled
+        }
+    }
+
+    suspend fun updateReduceMotion(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[REDUCE_MOTION] = enabled
         }
     }
 }

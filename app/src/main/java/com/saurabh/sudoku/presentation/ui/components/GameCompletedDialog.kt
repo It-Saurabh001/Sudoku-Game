@@ -4,43 +4,37 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.airbnb.lottie.compose.LottieConstants
 import com.saurabh.sudoku.domain.model.Difficulty
+import com.saurabh.sudoku.presentation.ui.theme.LocalReduceMotion
+import com.saurabh.sudoku.presentation.ui.theme.LocalSudokuColors
+import com.saurabh.sudoku.presentation.ui.theme.SudokuTheme
+import com.saurabh.sudoku.presentation.ui.theme.dialogEnterAnimation
 
 /**
- * Full-screen celebration card shown when the player wins.
+ * Win dialog: Green-family accent banner (ScoreCelebrationEffect / static trophy with
+ * Reduce Motion) + Blue600 primary action. No gradients/glow (U7).
  *
- * Layout (top → bottom inside a Dialog Card):
- *  ┌───────────────────────────────────────────────────────┐
- *  │  [  ScoreCelebrationEffect — Lottie fills full width  ]│  ← 220 dp tall
- *  │  ─────────────────────────────────────────────────── │
- *  │  🏆 Puzzle Solved!                                    │
- *  │  HARD  •  No hints                                    │
- *  │  ─────────────────────────────────────────────────── │
- *  │   ⏱ Time          🧩 Difficulty     💡 Hints Used     │  ← stats row
- *  │  ─────────────────────────────────────────────────── │
- *  │  [  Home  ]           [  New Game  ]                  │
- *  └───────────────────────────────────────────────────────┘
- *
- * The Dialog fills the screen width (usePlatformDefaultWidth = false) and is
- * horizontally padded by 24 dp so it looks like a card, not an alert box.
+ *  ┌───────────────────────────────────────────────┐
+ *  │  [ ScoreCelebrationEffect — successContainer ] │
+ *  │  Puzzle Solved!                                │
+ *  │  [Hard]  ✓ No hints used                       │
+ *  │   Time        Difficulty      Hints            │
+ *  │  [  Home  ]           [  New Game  ]           │
+ *  └───────────────────────────────────────────────┘
  */
 @Composable
 fun GameCompletedDialog(
@@ -51,10 +45,13 @@ fun GameCompletedDialog(
     onMainMenu: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val status = LocalSudokuColors.current
+    val reduceMotion = LocalReduceMotion.current
+
     // Animate the stats section sliding in after the Lottie starts
-    var statsVisible by remember { mutableStateOf(false) }
+    var statsVisible by remember { mutableStateOf(reduceMotion) }
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(400)   // slight delay after dialog appears
+        if (!reduceMotion) kotlinx.coroutines.delay(400)   // slight delay after dialog appears
         statsVisible = true
     }
 
@@ -68,43 +65,35 @@ fun GameCompletedDialog(
         Card(
             modifier = modifier
                 .testTag("completion_dialog")
+                .widthIn(max = 480.dp)
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            shape  = RoundedCornerShape(24.dp),
+                .padding(horizontal = 24.dp)
+                .dialogEnterAnimation(),
+            shape  = MaterialTheme.shapes.extraLarge,
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            )
         ) {
             Column(
                 modifier            = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // ── Animation banner ──────────────────────────────────────
+                // ── Celebration banner (Green family) ─────────────────────
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primaryContainer,
-                                    MaterialTheme.colorScheme.surface
-                                )
-                            )
-                        ),
+                        .heightIn(min = 200.dp)
+                        .background(status.successContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Lottie fills the entire banner — no hardcoded size
                     ScoreCelebrationEffect(
-                        modifier   = Modifier.fillMaxSize(),
+                        modifier   = Modifier.fillMaxWidth().height(200.dp),
                         iterations = 3              // 3 loops then stops naturally
                     )
                 }
 
-                // ── Title ─────────────────────────────────────────────────
+                // ── Title + stats ─────────────────────────────────────────
                 AnimatedVisibility(
                     visible = statsVisible,
                     enter   = fadeIn(tween(400)) + slideInVertically(
@@ -113,68 +102,75 @@ fun GameCompletedDialog(
                     )
                 ) {
                     Column(
-                        modifier            = Modifier
+                        modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
-                            .padding(top = 20.dp),
+                            .padding(top = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text       = "🏆 Puzzle Solved!",
+                            text       = "Puzzle Solved!",
                             style      = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.ExtraBold,
-                            color      = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            color      = status.onSuccessContainer,
                             textAlign  = TextAlign.Center
                         )
 
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(8.dp))
 
-                        Text(
-                            text      = buildString {
-                                append(difficulty.displayName)
-                                if (hintsUsed == 0) append("  •  No hints used ✨")
-                            },
-                            style     = MaterialTheme.typography.bodyMedium,
-                            color     = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            DifficultyBadge(difficulty)
+                            if (hintsUsed == 0) {
+                                Icon(
+                                    Icons.Outlined.CheckCircle,
+                                    contentDescription = null,
+                                    tint = status.success,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "No hints used",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
 
                         // ── Stats row ─────────────────────────────────────
-                        Spacer(Modifier.height(20.dp))
+                        Spacer(Modifier.height(24.dp))
 
                         Row(
                             modifier              = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            StatChip(label = "Time",       value = formatTime(completionTime))
-                            StatChip(label = "Difficulty", value = difficulty.displayName)
-                            StatChip(label = "Hints",      value = hintsUsed.toString())
+                            StatChip(label = "Time",       value = formatTime(completionTime), modifier = Modifier.weight(1f))
+                            StatChip(label = "Difficulty", value = difficulty.displayName,     modifier = Modifier.weight(1f))
+                            StatChip(label = "Hints",      value = hintsUsed.toString(),       modifier = Modifier.weight(1f))
                         }
 
                         // ── Action buttons ────────────────────────────────
-                        Spacer(Modifier.height(28.dp))
+                        Spacer(Modifier.height(24.dp))
 
                         Row(
                             modifier              = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            OutlinedButton(
+                            SecondaryButton(
                                 onClick  = onMainMenu,
-                                modifier = Modifier.weight(1f),
-                                shape    = RoundedCornerShape(12.dp)
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Text("Home", fontWeight = FontWeight.Medium)
+                                Text("Home", style = MaterialTheme.typography.labelLarge, maxLines = 1)
                             }
 
-                            Button(
+                            PrimaryButton(
                                 onClick  = onNewGame,
-                                modifier = Modifier.weight(1f),
-                                shape    = RoundedCornerShape(12.dp),
-                                colors   = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                )
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Text("New Game", fontWeight = FontWeight.Bold)
+                                Text("New Game", style = MaterialTheme.typography.labelLarge, maxLines = 1)
                             }
                         }
 
@@ -188,29 +184,32 @@ fun GameCompletedDialog(
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/** Small pill chip used in the stats row. */
+/** Small tonal chip used in the stats row. */
 @Composable
-private fun StatChip(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
+private fun StatChip(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 text       = value,
                 style      = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color      = MaterialTheme.colorScheme.primary
+                color      = MaterialTheme.colorScheme.onSurface,
+                textAlign  = TextAlign.Center,
+                maxLines   = 1,
+                overflow   = TextOverflow.Ellipsis,
+                modifier   = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
             )
         }
         Spacer(Modifier.height(4.dp))
         Text(
             text  = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
         )
     }
 }
@@ -228,11 +227,11 @@ private fun formatTime(ms: Long): String {
 @Preview(showBackground = true, widthDp = 400, heightDp = 700)
 @Composable
 private fun GameCompletedDialogPreview() {
-    MaterialTheme {
+    SudokuTheme {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
+                .background(LocalSudokuColors.current.scrim.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             GameCompletedDialog(

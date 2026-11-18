@@ -94,29 +94,56 @@ class GameRepositoryImpl @Inject constructor(
         val boardType = object : TypeToken<Array<IntArray>>() {}.type
         val notesType = object : TypeToken<Notes>() {}.type
 
+        val parsedBoard: Array<IntArray> = try {
+            gson.fromJson(board, boardType) ?: Array(9) { IntArray(9) }
+        } catch (e: Exception) {
+            android.util.Log.e("GameRepository", "Corrupted board JSON for game $id, fallback to empty", e)
+            Array(9) { IntArray(9) }
+        }
+
+        val parsedSolution: Array<IntArray> = try {
+            gson.fromJson(solution, boardType) ?: Array(9) { IntArray(9) }
+        } catch (e: Exception) {
+            android.util.Log.e("GameRepository", "Corrupted solution JSON for game $id, fallback to empty", e)
+            Array(9) { IntArray(9) }
+        }
+
+        val parsedInitialBoard: Array<IntArray> = try {
+            gson.fromJson(initialBoard, boardType) ?: Array(9) { IntArray(9) }
+        } catch (e: Exception) {
+            android.util.Log.e("GameRepository", "Corrupted initialBoard JSON for game $id, fallback to empty", e)
+            Array(9) { IntArray(9) }
+        }
+
+        val parsedNotes: Notes = try {
+            gson.fromJson(notes, notesType) ?: Notes()
+        } catch (e: Exception) {
+            android.util.Log.e("GameRepository", "Corrupted notes JSON for game $id, fallback to empty", e)
+            Notes()
+        }
+
         return Game(
             id = id,
             board = SudokuBoard(
-                board = gson.fromJson(board, boardType),
-                solution = gson.fromJson(solution, boardType),
-                initialBoard = gson.fromJson(initialBoard, boardType)
+                board = parsedBoard,
+                solution = parsedSolution,
+                initialBoard = parsedInitialBoard
             ),
             initialBoard = SudokuBoard(
-                board = gson.fromJson(initialBoard, boardType),
-                solution = gson.fromJson(solution, boardType),
-                initialBoard = gson.fromJson(initialBoard, boardType)
+                board = parsedInitialBoard.map { it.clone() }.toTypedArray(),
+                solution = parsedSolution,
+                initialBoard = parsedInitialBoard
             ),
             difficulty = Difficulty.fromString(difficulty),
             startTime = startTime,
             currentTime = currentTime,
-            state = GameState.valueOf(state),
+            state = try { GameState.valueOf(state) } catch (e: Exception) { GameState.PLAYING },
             hintsUsed = hintsUsed,
             createdAt = createdAt,
             completedAt = completedAt,
             mistakes = mistakes,
             maxMistakes = maxMistakes,
-            notes = gson.fromJson(notes, notesType) ?: Notes()
-
+            notes = parsedNotes
         )
     }
 

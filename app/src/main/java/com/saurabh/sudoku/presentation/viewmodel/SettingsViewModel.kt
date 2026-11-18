@@ -40,6 +40,9 @@ class SettingsViewModel @Inject constructor(
     val notesModeEnabled = preferencesRepository.notesModeEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val reduceMotion = preferencesRepository.reduceMotion
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     fun setThemeMode(mode: String) = viewModelScope.launch {
         android.util.Log.d("SettingsViewModel", "setThemeMode: $mode")
         preferencesRepository.updateThemeMode(mode)
@@ -79,5 +82,10 @@ class SettingsViewModel @Inject constructor(
     fun setNotesModeEnabled(enabled: Boolean) = viewModelScope.launch {
         android.util.Log.d("SettingsViewModel", "setNotesModeEnabled: $enabled")
         preferencesRepository.updateNotesModeEnabled(enabled)
+    }
+
+    fun setReduceMotion(enabled: Boolean) = viewModelScope.launch {
+        android.util.Log.d("SettingsViewModel", "setReduceMotion: $enabled")
+        preferencesRepository.updateReduceMotion(enabled)
     }
 }

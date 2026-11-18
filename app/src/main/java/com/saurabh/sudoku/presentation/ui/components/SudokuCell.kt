@@ -1,142 +1,177 @@
 package com.saurabh.sudoku.presentation.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.saurabh.sudoku.presentation.ui.theme.LocalReduceMotion
+import com.saurabh.sudoku.presentation.ui.theme.LocalSudokuColors
+import com.saurabh.sudoku.presentation.ui.theme.SudokuMotion
 
+/**
+ * Single cell. Stable primitive params only (Part 3 §3).
+ * State priority (U15): Conflict > Selected > Same-number > Peer > Normal.
+ * Press = Cyan family shade-swap, no ripple, NO press scale.
+ * Pop / shake run in graphicsLayer and are disabled with Reduce Motion.
+ */
 @Composable
 fun SudokuCell(
+    row: Int,
+    col: Int,
     value: Int,
-    isInitial: Boolean,
+    isGiven: Boolean,
     isSelected: Boolean,
-    isHighlighted: Boolean,     // same row/col/box as selected
-    isSameNumber: Boolean,      // same value as selected cell
-    hasConflict: Boolean,
-    notes: Set<Int> = emptySet(),
-    isNotesMode: Boolean = false,
-    justPlaced: Boolean = false,   // triggers scale pop animation
-    justMistake: Boolean = false,  // triggers shake animation
-    onClick: () -> Unit,
+    isPeer: Boolean,
+    isSameNumber: Boolean,
+    isConflict: Boolean,
+    notesMask: Int,
+    notesActive: Boolean,
+    justPlaced: Boolean,
+    justMistake: Boolean,
+    digitSize: TextUnit,
+    noteSize: TextUnit,
+    onClick: (row: Int, col: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // ── Background color with smooth transition ──────────────────────────────
+    val status = LocalSudokuColors.current
+    val reduceMotion = LocalReduceMotion.current
+    val interaction = remember { MutableInteractionSource() }
+    val isPressed by interaction.collectIsPressedAsState()
+
+    // ── Background (strict priority) ────────────────────────────────────────
     val targetBg = when {
-        hasConflict  -> MaterialTheme.colorScheme.errorContainer
-        isSelected   -> MaterialTheme.colorScheme.primaryContainer
-        isSameNumber -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-        isHighlighted -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-        isInitial    -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-        else         -> MaterialTheme.colorScheme.surface
+        isConflict   -> status.cellConflict
+        justPlaced   -> status.cellCorrect
+        isSelected   -> if (isPressed) status.cellSelectedPressed else status.cellSelected
+        isSameNumber -> status.cellSameNumber
+        isPeer       -> status.cellPeer
+        isPressed    -> status.cellPressed
+        else         -> status.cellNormal
     }
-    val animatedBg by animateColorAsState(
-        targetValue = targetBg,
-        animationSpec = tween(durationMillis = 160),
-        label = "cellBg"
-    )
+    val animatedBg by animateColorAsState(targetBg, tween(SudokuMotion.PRESS_MS), label = "cellBg")
 
-    // ── Text color ────────────────────────────────────────────────────────────
     val textColor = when {
-        hasConflict  -> MaterialTheme.colorScheme.onErrorContainer
-        isInitial    -> MaterialTheme.colorScheme.onSurface
-        else         -> MaterialTheme.colorScheme.primary
+        isConflict                 -> status.onCellConflict
+        justPlaced                 -> status.onCellCorrect
+        isSelected || isSameNumber -> status.digitHighlighted
+        isGiven                    -> status.digitGiven
+        else                       -> status.digitUser
     }
 
-    // ── Border ───────────────────────────────────────────────────────────────
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        animationSpec = tween(160),
-        label = "cellBorder"
-    )
-    val borderWidth = if (isSelected) 2.dp else 0.dp
-
-    // ── Scale pop animation on correct placement ──────────────────────────────
-    var triggerScale by remember { mutableStateOf(false) }
+    // ── Placement pop: 1.0 → 1.12 → 1.0 ─────────────────────────────────────
+    val pop = remember { Animatable(1f) }
     LaunchedEffect(justPlaced) {
-        if (justPlaced) {
-            triggerScale = true
+        if (justPlaced && !reduceMotion) {
+            val bouncy = spring<Float>(Spring.DampingRatioMediumBouncy, Spring.StiffnessHigh)
+            pop.animateTo(1.12f, bouncy)
+            pop.animateTo(1f, bouncy)
         }
     }
-    val scale by animateFloatAsState(
-        targetValue = if (triggerScale) 1.12f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessHigh
-        ),
-        finishedListener = { triggerScale = false },
-        label = "cellScale"
-    )
 
-    // ── Shake animation on mistake ────────────────────────────────────────────
-    val shakeOffset by remember { mutableStateOf(Animatable(0f)) }
+    // ── Mistake shake: 0 → 6 → -6 → 4 → -4 → 0 (300ms) ─────────────────────
+    val shake = remember { Animatable(0f) }
     LaunchedEffect(justMistake) {
-        if (justMistake) {
-            shakeOffset.animateTo(
+        if (justMistake && !reduceMotion) {
+            shake.animateTo(
                 targetValue = 0f,
                 animationSpec = keyframes {
                     durationMillis = 300
-                    6f at 50
-                    -6f at 100
-                    4f at 150
-                    -4f at 200
-                    2f at 250
+                    6f at 60
+                    -6f at 120
+                    4f at 180
+                    -4f at 240
                     0f at 300
                 }
             )
         }
     }
 
+    val description = buildString {
+        append("Row ${row + 1}, column ${col + 1}, ")
+        append(if (value != 0) "$value" else "empty")
+        if (isGiven) append(", given")
+        if (isConflict) append(", conflict")
+        if (isSelected) append(", selected")
+    }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .aspectRatio(1f)
-            .scale(scale)
-            .offset(x = shakeOffset.value.dp)
-            .background(animatedBg, RoundedCornerShape(3.dp))
-            .border(borderWidth, borderColor, RoundedCornerShape(3.dp))
-            .clickable(onClick = onClick)
-            .padding(1.dp)
+            .background(animatedBg)
+            .then(
+                if (isSelected) Modifier.border(2.dp, status.cellSelectedBorder) else Modifier
+            )
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                onClick = { onClick(row, col) }
+            )
+            .semantics { contentDescription = description }
     ) {
-        when {
-            value != 0 -> {
-                Text(
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    translationX = shake.value * density
+                    scaleX = pop.value
+                    scaleY = pop.value
+                }
+        ) {
+            when {
+                value != 0 -> Text(
                     text = value.toString(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 20.sp,
+                    style = TextStyle(
+                        fontSize = digitSize,
+                        lineHeight = digitSize,
+                        fontWeight = if (isGiven) FontWeight.Bold else FontWeight.SemiBold,
                         color = textColor,
-                        fontWeight = if (isInitial) FontWeight.Bold else FontWeight.SemiBold
-                    ),
-                    textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center
+                    )
                 )
-            }
-            notes.isNotEmpty() -> {
-                NoteGrid(notes = notes, isNotesMode = isNotesMode)
+                notesMask != 0 -> NoteGrid(
+                    notesMask = notesMask,
+                    noteSize = noteSize,
+                    color = if (notesActive) status.noteActive else status.note
+                )
             }
         }
     }
 }
 
 @Composable
-private fun NoteGrid(notes: Set<Int>, isNotesMode: Boolean) {
-    val noteColor = if (isNotesMode)
-        MaterialTheme.colorScheme.primary
-    else
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
-
+private fun NoteGrid(notesMask: Int, noteSize: TextUnit, color: Color) {
     Column(
         modifier = Modifier.fillMaxSize().padding(1.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -149,13 +184,16 @@ private fun NoteGrid(notes: Set<Int>, isNotesMode: Boolean) {
                 for (noteCol in 0..2) {
                     val n = noteRow * 3 + noteCol + 1
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        if (notes.contains(n)) {
+                        if (notesMask and (1 shl n) != 0) {
                             Text(
                                 text = n.toString(),
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = noteColor,
-                                textAlign = TextAlign.Center
+                                style = TextStyle(
+                                    fontSize = noteSize,
+                                    lineHeight = noteSize,
+                                    fontWeight = FontWeight.Medium,
+                                    color = color,
+                                    textAlign = TextAlign.Center
+                                )
                             )
                         }
                     }

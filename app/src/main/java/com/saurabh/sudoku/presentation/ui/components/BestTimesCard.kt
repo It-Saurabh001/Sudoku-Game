@@ -21,9 +21,8 @@ fun BestTimesCard(
 ) {
     Log.d(TAG, "🏆 BestTimesCard rendering")
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    SudokuCard(
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -31,7 +30,7 @@ fun BestTimesCard(
             Text(
                 text = "Best Times",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -46,18 +45,11 @@ fun BestTimesCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = difficulty.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
+                    DifficultyBadge(difficulty)
 
                     Surface(
                         shape = MaterialTheme.shapes.small,
-                        color = if (bestTime > 0L)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.surfaceVariant
+                        color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Text(
                             text = timeString,
@@ -65,9 +57,10 @@ fun BestTimesCard(
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = if (bestTime > 0L)
-                                MaterialTheme.colorScheme.onPrimaryContainer
+                                MaterialTheme.colorScheme.onSurface
                             else
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
                     }
                 }

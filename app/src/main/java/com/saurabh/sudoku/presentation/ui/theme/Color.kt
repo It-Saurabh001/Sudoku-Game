@@ -2,86 +2,98 @@ package com.saurabh.sudoku.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// ─────────────────────────────────────────────────────────────────────────────
+// Sudoku Modern colour system (docs/ui_rules.md Part 2).
+// Raw colours live ONLY in this file. Screens use MaterialTheme.colorScheme.*
+// or LocalSudokuColors (SudokuStatusColors).
+// ─────────────────────────────────────────────────────────────────────────────
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Brand Blue — primary & user input
+val Blue50 = Color(0xFFEFF5FF)
+val Blue100 = Color(0xFFDCE9FF)
+val Blue200 = Color(0xFFBBD3FF)
+val Blue300 = Color(0xFF8FB5FF)
+val Blue400 = Color(0xFF5E91F5)
+val Blue500 = Color(0xFF3975ED)
+val Blue600 = Color(0xFF2563EB)
+val Blue700 = Color(0xFF1D4FC2)
+val Blue800 = Color(0xFF173F9E)
+val Blue900 = Color(0xFF123477)
 
-// Sudoku specific colors
-val SudokuBlue = Color(0xFF1976D2)
-val SudokuLightBlue = Color(0xFF42A5F5)
-val SudokuDarkBlue = Color(0xFF1565C0)
+// Navy — board grid, clues & structure
+val Navy50 = Color(0xFFF1F4FA)
+val Navy100 = Color(0xFFDDE4F1)
+val Navy200 = Color(0xFFB8C6DF)
+val Navy300 = Color(0xFF879BBC)
+val Navy400 = Color(0xFF536F9D)
+val Navy500 = Color(0xFF294B83)
+val Navy600 = Color(0xFF0B2F7A)
+val Navy700 = Color(0xFF082762)
+val Navy800 = Color(0xFF061E4D)
+val Navy900 = Color(0xFF041735)
 
-val CellDefault = Color(0xFFFFFFFF)
-val CellSelected = Color(0xFFE3F2FD)
-val CellHighlight = Color(0xFFF3E5F5)
-val CellErrors = Color(0xFFFFEBEE)
-val CellFixed = Color(0xFFF5F5F5)
+// Cyan — cell selection & focus
+val Cyan50 = Color(0xFFF0FBFF)
+val Cyan100 = Color(0xFFDDF6FF)
+val Cyan200 = Color(0xFFBDEBFF)
+val Cyan300 = Color(0xFF8EDCFF)
+val Cyan400 = Color(0xFF5BC9F5)
+val Cyan500 = Color(0xFF28B5E8)
+val Cyan600 = Color(0xFF1498CC)
+val Cyan700 = Color(0xFF087AA8)
+val Cyan800 = Color(0xFF075F83)
+val Cyan900 = Color(0xFF06465F)
 
-val TextPrimary = Color(0xFF212121)
-val TextSecondary = Color(0xFF757575)
-val TextError = Color(0xFFD32F2F)
-val TextHint = Color(0xFF9C27B0)
+// Semantic families (game feedback only): base / light container / strong text
+val Green = Color(0xFF16A36A)
+val GreenLight = Color(0xFFDDF7EA)
+val GreenStrong = Color(0xFF08613D)
 
-val ButtonPrimary = Color(0xFF1976D2)
-val ButtonSecondary = Color(0xFF757575)
+val Amber = Color(0xFFE59A18)
+val AmberLight = Color(0xFFFFF2D6)
+val AmberStrong = Color(0xFF805000)
+val AmberLightPressed = Color(0xFFFFE6B3)   // Amber family press step
+val AmberLightHeld = Color(0xFFFFD98C)      // Amber family hold step
 
-// Light Theme Colors
-val md_theme_light_primary = Color(0xFF4359A8)
-val md_theme_light_onPrimary = Color(0xFFFFFFFF)
-val md_theme_light_primaryContainer = Color(0xFFDAE1FF)
-val md_theme_light_onPrimaryContainer = Color(0xFF001550)
-val md_theme_light_secondary = Color(0xFF595D71)
-val md_theme_light_onSecondary = Color(0xFFFFFFFF)
-val md_theme_light_secondaryContainer = Color(0xFFDEE1F9)
-val md_theme_light_onSecondaryContainer = Color(0xFF161B2C)
-val md_theme_light_tertiary = Color(0xFF745470)
-val md_theme_light_onTertiary = Color(0xFFFFFFFF)
-val md_theme_light_tertiaryContainer = Color(0xFFFED7F8)
-val md_theme_light_onTertiaryContainer = Color(0xFF2B122B)
-val md_theme_light_error = Color(0xFFBA1A1A)
-val md_theme_light_onError = Color(0xFFFFFFFF)
-val md_theme_light_errorContainer = Color(0xFFFFDAD6)
-val md_theme_light_onErrorContainer = Color(0xFF410002)
-val md_theme_light_background = Color(0xFFFEFBFF)
-val md_theme_light_onBackground = Color(0xFF1B1B1F)
-val md_theme_light_surface = Color(0xFFFEFBFF)
-val md_theme_light_onSurface = Color(0xFF1B1B1F)
-val md_theme_light_surfaceVariant = Color(0xFFE3E1EC)
-val md_theme_light_onSurfaceVariant = Color(0xFF46464F)
-val md_theme_light_outline = Color(0xFF767680)
+val Red = Color(0xFFD94343)
+val RedLight = Color(0xFFFDE7E7)
+val RedStrong = Color(0xFF982B2B)
+val RedLightHeld = Color(0xFFF9CFCF)        // Red family hold step
 
-// Dark Theme Colors
-val md_theme_dark_primary = Color(0xFFB2C5FF)
-val md_theme_dark_onPrimary = Color(0xFF0F2A77)
-val md_theme_dark_primaryContainer = Color(0xFF2A418F)
-val md_theme_dark_onPrimaryContainer = Color(0xFFDAE1FF)
-val md_theme_dark_secondary = Color(0xFFC2C5DD)
-val md_theme_dark_onSecondary = Color(0xFF2B3042)
-val md_theme_dark_secondaryContainer = Color(0xFF424659)
-val md_theme_dark_onSecondaryContainer = Color(0xFFDEE1F9)
-val md_theme_dark_tertiary = Color(0xFFE2BBDD)
-val md_theme_dark_onTertiary = Color(0xFF422740)
-val md_theme_dark_tertiaryContainer = Color(0xFF5B3D58)
-val md_theme_dark_onTertiaryContainer = Color(0xFFFED7F8)
-val md_theme_dark_error = Color(0xFFFFB4AB)
-val md_theme_dark_onError = Color(0xFF690005)
-val md_theme_dark_errorContainer = Color(0xFF93000A)
-val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
-val md_theme_dark_background = Color(0xFF1B1B1F)
-val md_theme_dark_onBackground = Color(0xFFE4E2E6)
-val md_theme_dark_surface = Color(0xFF1B1B1F)
-val md_theme_dark_onSurface = Color(0xFFE4E2E6)
-val md_theme_dark_surfaceVariant = Color(0xFF46464F)
-val md_theme_dark_onSurfaceVariant = Color(0xFFC6C5D0)
-val md_theme_dark_outline = Color(0xFF90909A)
+val Violet = Color(0xFF7657D6)
+val VioletLight = Color(0xFFEEE9FF)
+val VioletStrong = Color(0xFF49339A)
 
-// Sudoku Specific Colors (Now derived from theme for better blending)
-val CellError = Color(0xFFF2B8B5)
-val CellSelectedLight = Color(0xFFDAE1FF)
-val CellSelectedDark = Color(0xFF2A418F)
-val CellFixedLight = Color(0xFFF0F0F0)
-val CellFixedDark = Color(0xFF2C2C30)
+// Neutral family
+val White = Color(0xFFFFFFFF)
+val OffWhite = Color(0xFFF8FAFF)
+val SurfaceSoft = Color(0xFFF1F5FC)
+val FieldFill = Color(0xFFEAF0FA)
+val Outline = Color(0xFFD6DFEF)
+val OutlineStrong = Color(0xFFAAB9D2)
+val Ink = Color(0xFF14213D)
+val Muted = Color(0xFF66758F)
+val Disabled = Color(0xFF9AA7BA)
+val Scrim = Color(0xFF101A2B)
+
+// ── Deliberate dark-mode tokens (no pure black) ──────────────────────────────
+val DarkSurface = Color(0xFF0B2147)          // cards, cells, bars
+val DarkSurfaceSoft = Color(0xFF122C59)      // tool tiles, secondary cards
+val DarkFieldFill = Color(0xFF183566)        // container high
+val DarkOutline = Color(0xFF2B4A7E)          // card / chip borders
+val DarkMuted = Color(0xFF9AACC9)            // secondary text, notes
+val DarkDisabled = Color(0xFF5F7398)         // disabled content
+val DarkCyanSurface = Color(0xFF0E3F5C)      // selected cell (cyan-tinted)
+val DarkCyanPressed = Color(0xFF135273)
+val DarkPeer = Color(0xFF102A55)             // row/col/box peers
+val DarkSameNumber = Color(0xFF1A3D78)       // same digit
+val DarkBlueHeld = Color(0xFF23477F)
+val DarkGreenContainer = Color(0xFF0F3B2B)
+val DarkGreenText = Color(0xFF8EE6BC)
+val DarkAmberContainer = Color(0xFF4A3510)
+val DarkAmberText = Color(0xFFFFD48A)
+val DarkRedContainer = Color(0xFF4F1C22)
+val DarkRedText = Color(0xFFFFB3B3)
+val DarkRedPressed = Color(0xFFFF8F8F)
+val DarkVioletContainer = Color(0xFF2F2463)
+val DarkVioletText = Color(0xFFCFC2FF)

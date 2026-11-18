@@ -1,135 +1,125 @@
 package com.saurabh.sudoku.presentation.ui.components
 
 import android.util.Log
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Redo
-import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.Backspace
+import androidx.compose.material.icons.automirrored.outlined.Redo
+import androidx.compose.material.icons.automirrored.outlined.Undo
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material3.*
+import androidx.compose.material.icons.outlined.Lightbulb
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.saurabh.sudoku.presentation.ui.theme.SudokuTimerTextStyle
+import com.saurabh.sudoku.presentation.ui.theme.LocalSudokuColors
 import com.saurabh.sudoku.presentation.utils.formatTime
 
+/**
+ * Action toolbar (Part 4 §2): Undo, Redo, Erase, Notes, Hint.
+ * Pause / Reset live in the top app bar; timer is [GameTimer].
+ */
 @Composable
 fun GameToolbar(
-    elapsedTime: Long,
     hintsRemaining: Int,
-    isPaused: Boolean,
-    mistakes: Int,
-    maxMistakes: Int,
     isNotesMode: Boolean,
+    notesEnabled: Boolean,
     onNotesModeToggle: () -> Unit,
-    onPauseClick: () -> Unit,
     onHintClick: () -> Unit,
     onUndoClick: () -> Unit,
     onRedoClick: () -> Unit,
-    onResetClick: () -> Unit,
+    onEraseClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val TAG = "GameToolbar"
-    Log.d(TAG, "GameToolbar composed with elapsedTime=$elapsedTime, hintsRemaining=$hintsRemaining, isPaused=$isPaused, mistakes=$mistakes/$maxMistakes, isNotesMode=$isNotesMode")
-    val notesBgColor by animateColorAsState(
-        targetValue = if (isNotesMode)
-            MaterialTheme.colorScheme.primaryContainer
-        else
-            MaterialTheme.colorScheme.surface,
-        animationSpec = tween(200),
-        label = "notesBg"
-    )
-    val notesIconColor by animateColorAsState(
-        targetValue = if (isNotesMode)
-            MaterialTheme.colorScheme.onPrimaryContainer
-        else
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-        animationSpec = tween(200),
-        label = "notesIcon"
-    )
+    Log.d(TAG, "GameToolbar composed with hintsRemaining=$hintsRemaining, isNotesMode=$isNotesMode")
+    val status = LocalSudokuColors.current
 
-    Column(
+    Row(
         modifier = modifier
             .testTag("game_toolbar")
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        // ── Row 1: Timer | Mistakes | Notes toggle ────────────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Timer
-            Text(
-                text = elapsedTime.formatTime(),
-                style = SudokuTimerTextStyle,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            // Mistakes pill
-            MistakeCounter(currentMistakes = mistakes, maxMistakes = maxMistakes)
-
-            // Notes mode toggle pill
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(notesBgColor)
-                    .padding(0.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                IconButton(onClick = onNotesModeToggle) {
-                    Icon(
-                        imageVector = if (isNotesMode) Icons.Default.EditNote else Icons.Outlined.EditNote,
-                        contentDescription = if (isNotesMode) "Switch to Number mode" else "Switch to Notes mode",
-                        tint = notesIconColor
-                    )
-                }
-            }
-        }
-
-        // ── Row 2: Action buttons ─────────────────────────────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        ToolbarButton(
+            icon = Icons.AutoMirrored.Outlined.Undo,
+            label = "Undo",
+            onClick = onUndoClick,
+            contentDescription = "Undo last move"
+        )
+        ToolbarButton(
+            icon = Icons.AutoMirrored.Outlined.Redo,
+            label = "Redo",
+            onClick = onRedoClick,
+            contentDescription = "Redo move"
+        )
+        ToolbarButton(
+            icon = Icons.AutoMirrored.Outlined.Backspace,
+            label = "Erase",
+            onClick = onEraseClick,
+            contentDescription = "Erase selected cell"
+        )
+        if (!notesEnabled) {
             ToolbarButton(
-                icon = if (isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                onClick = onPauseClick,
-                contentDescription = if (isPaused) "Resume game" else "Pause game"
+                icon = Icons.Outlined.EditNote,
+                label = "Notes",
+                onClick = onNotesModeToggle,
+                enabled = false,
+                contentDescription = "Notes disabled in Settings"
             )
+        } else if (isNotesMode) {
             ToolbarButton(
-                icon = Icons.Default.Lightbulb,
-                onClick = onHintClick,
-                enabled = hintsRemaining > 0,
-                contentDescription = "Hint ($hintsRemaining left)"
+                icon = Icons.Filled.EditNote,
+                label = "Notes",
+                onClick = onNotesModeToggle,
+                contentDescription = "Notes on. Switch to number mode",
+                badge = "ON",
+                container = status.notesOn,
+                containerPressed = status.chipSelectedPressed,
+                containerHeld = status.chipSelectedHeld,
+                contentColor = status.onNotesOn
             )
+        } else {
             ToolbarButton(
-                icon = Icons.AutoMirrored.Filled.Undo,
-                onClick = onUndoClick,
-                contentDescription = "Undo last move"
-            )
-            ToolbarButton(
-                icon = Icons.AutoMirrored.Filled.Redo,
-                onClick = onRedoClick,
-                contentDescription = "Redo move"
-            )
-            ToolbarButton(
-                icon = Icons.Default.Refresh,
-                onClick = onResetClick,
-                contentDescription = "Reset board"
+                icon = Icons.Outlined.EditNote,
+                label = "Notes",
+                onClick = onNotesModeToggle,
+                contentDescription = "Notes off. Switch to notes mode"
             )
         }
+        ToolbarButton(
+            icon = Icons.Outlined.Lightbulb,
+            label = "Hint",
+            onClick = onHintClick,
+            enabled = hintsRemaining > 0,
+            contentDescription = "Hint, $hintsRemaining left",
+            badge = hintsRemaining.toString(),
+            container = status.hintTile,
+            containerPressed = status.hintTilePressed,
+            containerHeld = status.hintTileHeld,
+            contentColor = status.onHintTile
+        )
     }
+}
+
+/** Isolated timer (Part 3 §3): only this recomposes on the 1-second tick. */
+@Composable
+fun GameTimer(
+    elapsedTime: Long,
+    modifier: Modifier = Modifier
+) {
+    val text = elapsedTime.formatTime()
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+        maxLines = 1,
+        modifier = modifier.semantics { contentDescription = "Time $text" }
+    )
 }

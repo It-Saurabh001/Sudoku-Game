@@ -30,9 +30,8 @@ fun OverallStatsCard(
     Log.d(TAG, "   - averageTime: $avgTime")
     Log.d(TAG, "   - winRate: $winRate%")
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    SudokuCard(
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -40,7 +39,7 @@ fun OverallStatsCard(
             Text(
                 text = "Overall Statistics",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 

@@ -11,6 +11,8 @@ interface PreferencesRepository {
     val highlightErrors: Flow<Boolean>
     val autoSave: Flow<Boolean>
     val notesModeEnabled: Flow<Boolean>
+    /** In-app Reduce Motion toggle (UI animations only). Default keeps existing fakes compiling. */
+    val reduceMotion: Flow<Boolean> get() = kotlinx.coroutines.flow.flowOf(false)
 
     suspend fun updateThemeMode(mode: String)
     suspend fun updateSoundEnabled(enabled: Boolean)
@@ -20,4 +22,5 @@ interface PreferencesRepository {
     suspend fun updateHighlightErrors(enabled: Boolean)
     suspend fun updateAutoSave(enabled: Boolean)
     suspend fun updateNotesModeEnabled(enabled: Boolean)
+    suspend fun updateReduceMotion(enabled: Boolean) {}
 }

@@ -33,9 +33,15 @@ class MainActivity : ComponentActivity() {
             // Get the view model at the top level
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
+            val reduceMotion by settingsViewModel.reduceMotion.collectAsStateWithLifecycle()
+            val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
 
 
-            SudokuTheme(themeMode = themeMode) {
+            SudokuTheme(
+                themeMode = themeMode,
+                reduceMotion = reduceMotion,
+                hapticsEnabled = vibrationEnabled
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

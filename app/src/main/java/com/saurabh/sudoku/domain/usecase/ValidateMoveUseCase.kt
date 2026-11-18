@@ -30,6 +30,8 @@ class ValidateMoveUseCase @Inject constructor() {
     ): ValidationResult {
         val TAG = "ValidateMoveUseCase"
         Log.d(TAG, "invoke() row=$row, col=$col, number=$number, currentMistakes=$currentMistakes, maxMistakes=$maxMistakes")
+        require(row in 0..8 && col in 0..8) { "Coordinates out of bounds: ($row, $col)" }
+        require(number in 0..9) { "Invalid Sudoku digit: $number" }
         // Erasing is always valid — never a mistake
         if (number == 0) {
             Log.d(TAG, "Erasing cell ($row, $col)")

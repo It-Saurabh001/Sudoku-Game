@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,21 +18,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saurabh.sudoku.domain.model.Achievement
+import com.saurabh.sudoku.presentation.ui.theme.LocalSudokuColors
 
 @Composable
 fun AchievementsListCard(
     achievements: List<Achievement>,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+    SudokuCard(
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -41,7 +40,7 @@ fun AchievementsListCard(
                 modifier = Modifier.padding(bottom = 16.dp)
             ) {
                 Text(
-                    text = "🏆 Trophy Room",
+                    text = "Trophy Room",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -72,22 +71,16 @@ fun AchievementRow(
     achievement: Achievement,
     modifier: Modifier = Modifier
 ) {
-    val contentAlpha = if (achievement.isUnlocked) 1f else 0.45f
-    val backgroundColor = if (achievement.isUnlocked) {
-        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f)
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    }
-    
-    val borderColor = if (achievement.isUnlocked) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-    } else {
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-    }
+    val status = LocalSudokuColors.current
+    // Unlocked: surface card + Blue accent. Locked: SurfaceSoft + Muted (color guide §4).
+    val backgroundColor = if (achievement.isUnlocked) MaterialTheme.colorScheme.surface else status.trophyLocked
+    val borderColor = MaterialTheme.colorScheme.outline
+    val accent = if (achievement.isUnlocked) status.trophyUnlocked else status.onTrophyLocked
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 72.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(backgroundColor)
             .border(
@@ -98,7 +91,7 @@ fun AchievementRow(
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Emoji Badge
+        // Badge: filled trophy when unlocked, lock when locked (never colour alone)
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -106,24 +99,17 @@ fun AchievementRow(
                 .clip(CircleShape)
                 .background(
                     if (achievement.isUnlocked)
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                        MaterialTheme.colorScheme.primaryContainer
                     else
                         MaterialTheme.colorScheme.surfaceVariant
                 )
         ) {
-            if (achievement.isUnlocked) {
-                Text(
-                    text = achievement.emoji,
-                    fontSize = 24.sp
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "Locked",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Icon(
+                imageVector = if (achievement.isUnlocked) Icons.Filled.EmojiEvents else Icons.Default.Lock,
+                contentDescription = if (achievement.isUnlocked) "Unlocked" else "Locked",
+                tint = accent,
+                modifier = Modifier.size(24.dp)
+            )
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -135,18 +121,19 @@ fun AchievementRow(
         ) {
             Text(
                 text = achievement.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium,
                 color = if (achievement.isUnlocked)
                     MaterialTheme.colorScheme.onSurface
                 else
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    status.onTrophyLocked,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(
                 text = achievement.description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)
             )
 
@@ -164,8 +151,8 @@ fun AchievementRow(
                             .fillMaxWidth()
                             .height(6.dp)
                             .clip(CircleShape),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.outline
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
@@ -174,8 +161,7 @@ fun AchievementRow(
                         Text(
                             text = "${achievement.currentProgress} / ${achievement.maxProgress}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.SemiBold
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

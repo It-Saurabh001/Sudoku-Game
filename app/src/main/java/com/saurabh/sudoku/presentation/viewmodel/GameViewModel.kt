@@ -333,17 +333,22 @@ class GameViewModel @Inject constructor(
         newBoard[row][col] = number
 
         val notesAfter = notesBefore.deepCopy()
-        if (number != 0 && validation.isValid) {
-            notesAfter.autoRemoveNotes(row, col, number, newBoard)
-        } else if (number != 0) {
+        if (number != 0) {
             notesAfter.clearNotes(row, col)
+            if (validation.isValid) {
+                notesAfter.autoRemoveNotes(row, col, number, newBoard)
+            }
         }
 
         if (moveIndex < moveHistory.size - 1) {
             moveHistory.subList(moveIndex + 1, moveHistory.size).clear()
         }
         moveHistory.add(Move(row, col, oldValue, number, notesBefore, notesAfter))
-        moveIndex++
+        if (moveHistory.size > 100) {
+            moveHistory.removeAt(0)
+        } else {
+            moveIndex++
+        }
 
         val finalGame = updatedGame.copy(
             board = updatedGame.board.copy(board = newBoard),
@@ -610,7 +615,11 @@ class GameViewModel @Inject constructor(
             moveHistory.subList(moveIndex + 1, moveHistory.size).clear()
         }
         moveHistory.add(Move(r, c, 0, value, notesBefore, clearedNotes))
-        moveIndex++
+        if (moveHistory.size > 100) {
+            moveHistory.removeAt(0)
+        } else {
+            moveIndex++
+        }
 
         val updatedBoard = game.board.copy(board = newBoard)
         val updatedGame = game.copy(

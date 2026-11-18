@@ -36,3 +36,40 @@ build/generated/ksp/
 # === Android Studio Profiling ===
 *.hprof
 
+# --- Private docs folder ---
+docs/
+**/docs/
+
+# === Build outputs ===
+**/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+app/release/
+app/debug/
+
+# === Kotlin / tooling caches ===
+.kotlin/
+*.class
+hs_err_pid*
+
+# === Test / lint reports ===
+lint-results*.xml
+lint-results*.html
+
+# === OS / editor junk ===
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+
+# === AI assistant local files ===
+.claude/
+CLAUDE.local.md
+
+# === Local secrets ===
+.env
+secrets.properties
+google-services.json

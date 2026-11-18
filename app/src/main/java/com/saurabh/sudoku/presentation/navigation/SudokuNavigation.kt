@@ -12,6 +12,10 @@ import com.saurabh.sudoku.presentation.ui.screens.HomeScreen
 import com.saurabh.sudoku.presentation.ui.screens.SettingsScreen
 import com.saurabh.sudoku.presentation.ui.screens.StatisticsScreen
 import com.saurabh.sudoku.presentation.ui.screens.TrophyRoomScreen
+import com.saurabh.sudoku.presentation.ui.theme.sudokuForwardEnter
+import com.saurabh.sudoku.presentation.ui.theme.sudokuForwardExit
+import com.saurabh.sudoku.presentation.ui.theme.sudokuPopEnter
+import com.saurabh.sudoku.presentation.ui.theme.sudokuPopExit
 
 
 @Composable
@@ -24,7 +28,12 @@ fun SudokuNavigation(
     NavHost(
         navController = navController,
         startDestination = SudokuScreen.Home.route,
-        modifier = modifier
+        modifier = modifier,
+        // docs/ui_rules.md Part 3 §2 — forward R→L 300ms, back L→R 280ms
+        enterTransition = { sudokuForwardEnter() },
+        exitTransition = { sudokuForwardExit() },
+        popEnterTransition = { sudokuPopEnter() },
+        popExitTransition = { sudokuPopExit() }
     ) {
         composable(route = SudokuScreen.Home.route) {
             Log.d(TAG, "Navigating to HomeScreen")
