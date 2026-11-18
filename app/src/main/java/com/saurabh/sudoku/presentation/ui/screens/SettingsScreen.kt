@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +49,7 @@ fun SettingsScreen(
     val highlightErrors by viewModel.highlightErrors.collectAsStateWithLifecycle()
     val autoSave by viewModel.autoSave.collectAsStateWithLifecycle()
     val notesModeEnabled by viewModel.notesModeEnabled.collectAsStateWithLifecycle()
+    val reduceMotion by viewModel.reduceMotion.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier
@@ -60,17 +61,20 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.secondary,
+                    actionIconContentColor = MaterialTheme.colorScheme.secondary
                 )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -84,6 +88,13 @@ fun SettingsScreen(
                 ThemeSelector(
                     selectedTheme = themeMode,
                     onThemeSelected = viewModel::setThemeMode
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                SettingsSwitch(
+                    title = "Reduce Motion",
+                    subtitle = "Turn off shake, pop and confetti animations",
+                    checked = reduceMotion,
+                    onCheckedChange = viewModel::setReduceMotion
                 )
             }
 
@@ -145,12 +156,14 @@ fun SettingsScreen(
             SettingsSection(title = "About") {
                 AboutItem(
                     title = "Version",
-                    subtitle = "1.0.0"
+                    subtitle = "1.0.0",
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
                 AboutItem(
                     title = "Developer",
-                    subtitle = "Sudoku Team"
+                    subtitle = "Sudoku Team",
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -158,7 +171,8 @@ fun SettingsScreen(
                 Text(
                     text = "A modern, offline Sudoku game built with Jetpack Compose.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
         }

@@ -14,8 +14,10 @@ import com.saurabh.sudoku.presentation.utils.Constants
 import com.saurabh.sudoku.presentation.utils.DateUtils
 import com.saurabh.sudoku.presentation.utils.deepCopy
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
@@ -62,7 +64,9 @@ class HomeViewModel @Inject constructor(
 
             try {
                 android.util.Log.d("HomeViewModel", "startNewGame() generating puzzle...")
-                val board = sudokuGenerator.generatePuzzle(difficulty)
+                val board = withContext(Dispatchers.Default) {
+                    sudokuGenerator.generatePuzzle(difficulty)
+                }
                 android.util.Log.d("HomeViewModel", "startNewGame() puzzle generated")
                 val currentTime = DateUtils.getCurrentTimestamp()
                 val maxMistakes = Constants.getMaxMistakes(difficulty.name)
@@ -81,6 +85,7 @@ class HomeViewModel @Inject constructor(
                 )
                 android.util.Log.d("HomeViewModel", "startNewGame() saving new game: ${game.id.take(8)}")
                 gameRepository.saveGame(game)
+                gameRepository.deleteAbandonedGames(game.id)
 
                 _uiState.update {
                     it.copy(

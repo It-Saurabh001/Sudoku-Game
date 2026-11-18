@@ -1,16 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-    kotlin("plugin.serialization") version "2.3.10"
+    kotlin("plugin.serialization") version "2.4.0"
 //    id("kotlin-parcelize")
 }
 
 android {
     namespace = "com.saurabh.sudoku"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.saurabh.sudoku"
@@ -24,7 +23,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,6 +37,17 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true   // silences android.util.Log in JVM unit tests
+        }
+    }
+
+    // Room schema export directory (optional, suppresses warning)
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 
 }
@@ -86,5 +97,19 @@ dependencies {
     // Gson for JSON serialization
     implementation(libs.gson)
 
-//    implementation("org.jetbrains.kotlinx:kotlinx-parcelize-runtime:1.7.3")
+    implementation(libs.dotlottie.android)
+
+
+    testImplementation (libs.mockito.kotlin)
+    testImplementation (libs.mockk)
+    testImplementation (libs.androidx.core.testing)
+    testImplementation (libs.kotlinx.coroutines.test)
+    testImplementation (libs.truth)
+
+    androidTestImplementation (libs.androidx.room.testing)
+    implementation(libs.lottie.compose)
+
+
+
+
 }

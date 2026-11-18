@@ -20,6 +20,7 @@ class PreferencesRepositoryImpl @Inject constructor(
     override val highlightErrors: Flow<Boolean> = preferencesDataStore.highlightErrors
     override val autoSave: Flow<Boolean> = preferencesDataStore.autoSave
     override val notesModeEnabled: Flow<Boolean> = preferencesDataStore.notesModeEnabled
+    override val reduceMotion: Flow<Boolean> = preferencesDataStore.reduceMotion
 
     override suspend fun updateThemeMode(mode: String) {
         Log.d(TAG, "updateThemeMode: $mode")
@@ -58,5 +59,9 @@ class PreferencesRepositoryImpl @Inject constructor(
     override suspend fun updateNotesModeEnabled(enabled: Boolean) {
         Log.d(TAG, "updateNotesModeEnabled: $enabled")
         preferencesDataStore.updateNotesModeEnabled(enabled)
+    }
+    override suspend fun updateReduceMotion(enabled: Boolean) {
+        Log.d(TAG, "updateReduceMotion: $enabled")
+        preferencesDataStore.updateReduceMotion(enabled)
     }
 }

@@ -2,7 +2,6 @@ package com.saurabh.sudoku.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import android.view.WindowInsetsController
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -10,109 +9,144 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
-private val DarkColorScheme = darkColorScheme(
-//    primary = Purple80,
-    primary = md_theme_dark_primary,
-    onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = md_theme_dark_primaryContainer,
-    onPrimaryContainer = md_theme_dark_onPrimaryContainer,
-//    secondary = PurpleGrey80,
-    secondary = md_theme_dark_secondary,
-    onSecondary = md_theme_dark_onSecondary,
-    secondaryContainer = md_theme_dark_secondaryContainer,
-    onSecondaryContainer = md_theme_dark_onSecondaryContainer,
-//    tertiary = Pink80,
-    tertiary = md_theme_dark_tertiary,
-    onTertiary = md_theme_dark_onTertiary,
-    tertiaryContainer = md_theme_dark_tertiaryContainer,
-    onTertiaryContainer = md_theme_dark_onTertiaryContainer,
-    error = md_theme_dark_error,
-    onError = md_theme_dark_onError,
-    errorContainer = md_theme_dark_errorContainer,
-    onErrorContainer = md_theme_dark_onErrorContainer,
-    background = md_theme_dark_background,
-    onBackground = md_theme_dark_onBackground,
-    surface = md_theme_dark_surface,
-    onSurface = md_theme_dark_onSurface,
-    surfaceVariant = md_theme_dark_surfaceVariant,
-    onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-    outline = md_theme_dark_outline,
-)
-
+// docs/ui_rules.md Part 2 §7 — exact light mapping.
 private val LightColorScheme = lightColorScheme(
-//    primary = Purple40,
-//    secondary = PurpleGrey40,
-//    tertiary = Pink40
-
-
-    primary = md_theme_light_primary,
-    onPrimary = md_theme_light_onPrimary,
-    primaryContainer = md_theme_light_primaryContainer,
-    onPrimaryContainer = md_theme_light_onPrimaryContainer,
-    secondary = md_theme_light_secondary,
-    onSecondary = md_theme_light_onSecondary,
-    secondaryContainer = md_theme_light_secondaryContainer,
-    onSecondaryContainer = md_theme_light_onSecondaryContainer,
-    tertiary = md_theme_light_tertiary,
-    onTertiary = md_theme_light_onTertiary,
-    tertiaryContainer = md_theme_light_tertiaryContainer,
-    onTertiaryContainer = md_theme_light_onTertiaryContainer,
-    error = md_theme_light_error,
-    onError = md_theme_light_onError,
-    errorContainer = md_theme_light_errorContainer,
-    onErrorContainer = md_theme_light_onErrorContainer,
-    background = md_theme_light_background,
-    onBackground = md_theme_light_onBackground,
-    surface = md_theme_light_surface,
-    onSurface = md_theme_light_onSurface,
-    surfaceVariant = md_theme_light_surfaceVariant,
-    onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    outline = md_theme_light_outline,
-
+    primary = Blue600,
+    onPrimary = White,
+    primaryContainer = Blue100,
+    onPrimaryContainer = Blue900,
+    inversePrimary = Blue300,
+    secondary = Navy600,
+    onSecondary = White,
+    secondaryContainer = Navy100,
+    onSecondaryContainer = Navy900,
+    tertiary = Cyan600,
+    onTertiary = White,
+    tertiaryContainer = Cyan100,
+    onTertiaryContainer = Cyan900,
+    error = Red,
+    onError = White,
+    errorContainer = RedLight,
+    onErrorContainer = RedStrong,
+    background = OffWhite,
+    onBackground = Ink,
+    surface = White,
+    onSurface = Ink,
+    surfaceVariant = SurfaceSoft,
+    onSurfaceVariant = Muted,
+    surfaceTint = Blue600,
+    inverseSurface = Navy900,
+    inverseOnSurface = White,
+    outline = Outline,
+    outlineVariant = Navy100,
+    scrim = Scrim,
+    surfaceBright = White,
+    surfaceDim = FieldFill,
+    surfaceContainerLowest = White,
+    surfaceContainerLow = OffWhite,
+    surfaceContainer = SurfaceSoft,
+    surfaceContainerHigh = FieldFill,
+    surfaceContainerHighest = Navy100,
 )
 
+// Deliberate dark mapping: Navy900 anchor, never pure black.
+private val DarkColorScheme = darkColorScheme(
+    primary = Blue300,
+    onPrimary = Navy900,
+    primaryContainer = Blue800,
+    onPrimaryContainer = Blue100,
+    inversePrimary = Blue600,
+    secondary = Navy200,
+    onSecondary = Navy900,
+    secondaryContainer = Navy500,
+    onSecondaryContainer = Navy50,
+    tertiary = Cyan300,
+    onTertiary = Cyan900,
+    tertiaryContainer = Cyan800,
+    onTertiaryContainer = Cyan100,
+    error = DarkRedText,
+    onError = Navy900,
+    errorContainer = DarkRedContainer,
+    onErrorContainer = DarkRedText,
+    background = Navy900,
+    onBackground = White,
+    surface = DarkSurface,
+    onSurface = White,
+    surfaceVariant = DarkSurfaceSoft,
+    onSurfaceVariant = DarkMuted,
+    surfaceTint = Blue300,
+    inverseSurface = Navy50,
+    inverseOnSurface = Navy900,
+    outline = DarkOutline,
+    outlineVariant = Navy700,
+    scrim = Scrim,
+    surfaceBright = DarkFieldFill,
+    surfaceDim = Navy900,
+    surfaceContainerLowest = Navy900,
+    surfaceContainerLow = Navy800,
+    surfaceContainer = DarkSurface,
+    surfaceContainerHigh = DarkSurfaceSoft,
+    surfaceContainerHighest = DarkFieldFill,
+)
+
+/**
+ * @param themeMode "light" | "dark" | "system"
+ * @param reduceMotion in-app Reduce Motion toggle (system animator scale is also honoured)
+ * @param hapticsEnabled Settings vibration toggle — gates long-press haptics
+ * @param dynamicColor optional Material You for shell surfaces only (board cues stay fixed)
+ */
 @Composable
 fun SudokuTheme(
-    themeMode : String = "system",
+    themeMode: String = "system",
+    reduceMotion: Boolean = false,
+    hapticsEnabled: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val useDarkTheme = when(themeMode){
+    val useDarkTheme = when (themeMode) {
         "light" -> false
         "dark" -> true
         else -> isSystemInDarkTheme()
-
     }
-    val colorScheme = if (useDarkTheme) DarkColorScheme else LightColorScheme
+    val context = LocalContext.current
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+            if (useDarkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        useDarkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+    val statusColors = if (useDarkTheme) DarkSudokuStatusColors else LightSudokuStatusColors
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             // Allow content to draw behind status bars
             WindowCompat.setDecorFitsSystemWindows(window, false)
-
-            // set background color status bar using windowInsetsControllerCompat
-            val windowInsetsController = WindowInsetsControllerCompat(window,view)
+            val windowInsetsController = WindowInsetsControllerCompat(window, view)
             windowInsetsController.isAppearanceLightStatusBars = !useDarkTheme
-
-            window.statusBarColor = colorScheme.background.toArgb()
-
-//             set status bar to transparent
-//            window.statusBarColor = Color.Transparent.toArgb()
-//            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !useDarkTheme
+            windowInsetsController.isAppearanceLightNavigationBars = !useDarkTheme
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    val systemReduceMotion = rememberSystemReduceMotion()
+
+    CompositionLocalProvider(
+        LocalSudokuColors provides statusColors,
+        LocalReduceMotion provides (reduceMotion || systemReduceMotion),
+        LocalHapticsEnabled provides hapticsEnabled,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

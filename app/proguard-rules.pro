@@ -1,21 +1,15 @@
 # Add project specific ProGuard rules here.
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep domain models and Room entities so Gson reflection doesn't fail in release builds
+-keepclassmembers class com.saurabh.sudoku.domain.model.** { <fields>; }
+-keep class com.saurabh.sudoku.domain.model.** { *; }
+-keepclassmembers class com.saurabh.sudoku.data.local.database.entities.** { <fields>; }
+-keep class com.saurabh.sudoku.data.local.database.entities.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Gson specific rules
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
+-keep class com.google.gson.** { *; }
